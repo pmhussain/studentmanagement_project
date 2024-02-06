@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import *
+from .forms import *
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 
@@ -70,3 +70,27 @@ def userlogin(request):
 def userlogout(request):
     logout(request)
     return redirect('login')
+
+
+def profile(request, pk):
+    user = User.objects.get(id=pk)
+    context = {'user':user}
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        # designation = request.POST.get(designation)
+        email = request.POST.get('email')
+        # mobile = request.POST.get(mobile)
+        # profile_pic = request.FILES.get('profile_pic')
+        try:
+            user = User.objects.get(id=pk)
+            user.first_name = first_name
+            user.last_name = last_name
+            user.email = email
+            user.save()
+            print('Profile updated sucessfully')
+            return redirect('profile',pk)
+        except Exception as e:
+            print(e)
+            print('Profile not updated')
+    return render(request, 'loginApp/profile.html', context)
