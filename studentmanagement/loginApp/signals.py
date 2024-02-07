@@ -1,3 +1,4 @@
+from .models import CustomUser
 from django.contrib.auth.models import User, Group
 from django.db.models.signals import post_save
 
@@ -6,4 +7,4 @@ def addToStudentGroup(sender, instance, created, **kwargs):
         group = Group.objects.get(name='STUDENT')
         instance.groups.add(group)
 
-post_save.connect(addToStudentGroup, sender=User)
+post_save.connect(addToStudentGroup, sender=CustomUser)

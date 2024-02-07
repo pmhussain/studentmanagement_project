@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User, Group
 from .decorators import unauthenticated_user, allowed_users, admin_only
 from django.contrib.auth.decorators import login_required
+from .models import CustomUser
 
 
 # Create your views here.
@@ -52,7 +53,7 @@ def userlogin(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         #print(username,password)
-        if User.objects.filter(username=username).exists():
+        if CustomUser.objects.filter(username=username).exists():
             #user exist in User's authenticate password
             user = authenticate(request, username=username, password=password)
             if user is not None:
@@ -73,20 +74,37 @@ def userlogout(request):
 
 
 def profile(request, pk):
-    user = User.objects.get(id=pk)
+    user = CustomUser.objects.get(id=pk)
     context = {'user':user}
     if request.method == 'POST':
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
-        # designation = request.POST.get(designation)
+        designation = request.POST.get('designation')
         email = request.POST.get('email')
-        # mobile = request.POST.get(mobile)
-        # profile_pic = request.FILES.get('profile_pic')
+        mobileno = request.POST.get('mobileno')
+        profile_pic = request.FILES.get('profile_pic')
+        if not profile_pic: # means if profile_pic not attached then use profile_pic as default profile_pic
+            profile_pic = user.profile_pic
         try:
-            user = User.objects.get(id=pk)
+            user = CustomUser.objects.get(id=pk)
             user.first_name = first_name
             user.last_name = last_name
+            user.designation = designation
             user.email = email
+            user.mobileno = mobileno
+            #  if profile_pic is attached, then check profile pic exist in direcorty or not if exist use the same.
+            import os
+            from django.conf import settings
+            imageslist = os.listdir(settings.MEDIA_ROOT) # list of all images
+            print(imageslist)
+            if  str(profile_pic) in imageslist:
+                index = imageslist.index(str(profile_pic))
+                print('same profile pic is present at index', index)
+                user.profile_pic = imageslist[index]
+            else:
+                print('new profile pic')
+                user.profile_pic = profile_pic
+
             user.save()
             print('Profile updated sucessfully')
             return redirect('profile',pk)
