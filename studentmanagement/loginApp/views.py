@@ -72,7 +72,7 @@ def userlogout(request):
     logout(request)
     return redirect('login')
 
-
+@login_required(login_url='login')
 def profile(request, pk):
     user = CustomUser.objects.get(id=pk)
     context = {'user':user}
@@ -112,3 +112,26 @@ def profile(request, pk):
             print(e)
             print('Profile not updated')
     return render(request, 'loginApp/profile.html', context)
+
+@login_required(login_url='login')
+def change_password(request,pk):
+    user = CustomUser.objects.get(id=pk)
+    context = {'user':user}
+    print('old_password', user.password)
+    if request.method == 'POST':
+        username = user.username
+        old_password = request.POST.get('old_password')
+        new_password1 = request.POST.get('new_password1')
+        new_password2 = request.POST.get('new_password2')
+        if user.check_password(old_password):
+            if new_password1 == new_password2:
+                user.set_password(new_password2)
+                user.save()
+                messages.success(request, "Password changed Sucessfully, \n login again with new password!")
+                return redirect('login')
+            else:
+                messages.warning(request, "two new passwords didnot matched")
+        else:
+            messages.warning(request, "You Entered wrong old password")
+    print('new_password', user.password)
+    return render(request, 'loginApp/change_password.html', context)

@@ -8,4 +8,5 @@ urlpatterns = [
     # path('student_page', views.student, name="student"),
     path('logout/', views.userlogout, name="logout"),
     path('profile/<int:pk>', views.profile, name="profile"),
+    path('change_password/<int:pk>', views.change_password, name="change_password"),
 ]
